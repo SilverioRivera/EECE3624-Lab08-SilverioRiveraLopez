@@ -4,8 +4,8 @@
  *    Author: Dr. Greg Nordstrom
  *   Created: 12/30/17
  *  Mod Date: 3/28/19, 1/17/21
- *  Modified:
- *   ModDate:
+ *  Modified: Silverio Rivera-Lopez
+ *   ModDate: 10/20/2026
  * 
  * Processor: ATmega128A (on the ReadyAVR board)
  *
