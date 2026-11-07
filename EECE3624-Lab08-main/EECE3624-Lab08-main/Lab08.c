@@ -34,27 +34,101 @@
 #define PARITY      0 // 0=none, 1=odd, 2=even
 
 /* Your code here.  */
+	void LEDblink(void) // blink led for 75 ms
+	{
+		PORTA |= (1 << PA0); // turn LED on
+		_delay_ms(75); // wait 75 ms, delay library
+		
+		PORTA &= ~(1 << PA0); // turn LED off
+	}
+	void printString(const char * str) // transmits a null terminated string through USART1
+	{
+		while(*str != '\0') // loops stop when it reaches the end of the string
+		{
+			uart_tx(*str); // reads the character at the address
+			str++; // moves the pointer to the next character
+		}
+	}
+	
+	void startupmessage(void)
+	{
+		// \r means carriage return
+		// \n line feed
+		// \0 null terminator
+		printString("\r\n\r\n");
+		
+		printString("RS232 Communications Server\r\n");
+		printString("Status: Active\r\n");
+		printString("Silverio Rivera-Lopez\r\n");
+		printString("EECE3624\r\n");
+		printString("Fall 2026");
+		
+		printString("\r\n\r\n");
+	}
 
 int main(void)
 {
 	/* Your code here.  */
+	unsigned char c;
+	unsigned char count = 0; // tracks the characters
+	
+	DDRA |=(1<< PA0); // Configure LED0 as output 
+	PORTA &= ~(1 << PA0); // Initial turn off LED0
+	
+	uart_init(BAUDRATE, DATABITS, STOPBITS, PARITY); // Initialize UART
 
-    /* See the UARTLibrary.h for available calls.
-	 *     	  // initialize the UART
-	 *     	  uart_init(BAUDRATE, DATABITS, STOPBITS, PARITY);
-	 *
-	 *        // transmit a value (0x41) to the comm port
-	 *        c = 0x41;
-	 *        uart_tx(c);
-	 *
-	 *        // receive a byte from the comm port
-	 *        c = uart_rx();
-	 */
-
-	uart_init(BAUDRATE, DATABITS, STOPBITS, PARITY);
-	while(1)
+	// main communication loop
+	while(1) 
 	{
-		/* your loop code here */
+		c = uart_rx(); // wait for character from Putty
+		LEDblink(); // receive character
+		
+		if(c == CR) // handling carriage return 
+		{
+			uart_tx(CR);
+			uart_tx(LF);
+		}
+		
+		else if (c == ESC) // handle ESC soft reset
+		{
+			count = 0;
+			startupmessage();
+			continue;
+		}
+		
+		else
+		{
+			uart_tx(c); // echo characters
+	
+		}
+		
+		if (c == 'e') // detect the sequence starting at 'e'. When 'end is detected send out bye termination message
+		{
+			count = 1;
+		}
+		else if (c == 'n' && count == 1)
+		{
+			count = 2;	
+		}
+		else if (c == 'd' && count == 2)
+		{
+			count = 3;
+		}
+		else
+		{
+			
+			count = 0;
+		}
+		
+		if(count == 3) // stop communication when "end is received
+		{
+			printString("\r\n\r\nBye"); // display termination message
+			
+			while(1) // stop responding to any inputs
+			{
+				
+			}
+		}
 		
 	}
 	return 0;
