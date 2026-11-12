@@ -36,10 +36,10 @@
 /* Your code here.  */
 	void LEDblink(void) // blink led for 75 ms
 	{
-		PORTA |= (1 << PA0); // turn LED on
+		PORTA &= ~(1 << PA0); // Wei: Drive the active-low LED pin low to turn it on.
 		_delay_ms(75); // wait 75 ms, delay library
 		
-		PORTA &= ~(1 << PA0); // turn LED off
+		PORTA |= (1 << PA0); // Wei: Drive the active-low LED pin high to turn it off.
 	}
 	void printString(const char * str) // transmits a null terminated string through USART1
 	{
@@ -73,9 +73,11 @@ int main(void)
 	unsigned char count = 0; // tracks the characters
 	
 	DDRA |=(1<< PA0); // Configure LED0 as output 
-	PORTA &= ~(1 << PA0); // Initial turn off LED0
+	PORTA |= (1 << PA0); // Wei: Keep the active-low LED off before the first blink.
 	
 	uart_init(BAUDRATE, DATABITS, STOPBITS, PARITY); // Initialize UART
+	// Wei: Display the startup banner immediately after UART initialization.
+	startupmessage();
 
 	// main communication loop
 	while(1) 
