@@ -22,28 +22,20 @@
 #include "UARTLibrary.h"
 
 
-// Use USART1_init to initialize the USART hardware in the AVR processor.
-// The function takes the following arguments:
-//    - desired baud rate (standard values from 2400 to 115200),
-//    - number of databits (5-8),
-//    - number of stop bits (1,2),
-//    - parity (0=no parity, 1=odd parity, 2=even parity).
-// No error checking is performed and the function does not return a value.
-//
-// For example,
-//     usart1_init(9600,8,1,0);
-// sets the baudrate to 9600, with 8 data bits, 1 stop bit, and no parity`
+// Wei: uart_init configures USART1 using the requested baud, 7/8 data bits,
+// Wei: 1/2 stop bits, and parity (0=none, 1=odd, 2=even).
+// Wei: Example: uart_init(9600, 8, 1, 0) selects 9600 baud, 8-N-1.
 void uart_init(long unsigned int baudrate, unsigned char databits, unsigned char stopbits, unsigned char parity) {
     /* your code here */
 	// Baud Rate Configuration
 	unsigned int UBRR;
-	UBRR = (7372800UL / (16UL * baudrate))-1;     // FCPU / (16 * Baud Rate) - 1
-												 // UL: unsigned long integer constant 
+	// Wei: Calculate the USART1 divisor using the shared oscillator constant.
+	UBRR = (F_OSC / (16UL * baudrate)) - 1UL;
 	// Hardware registers
 	UCSR1B = 0;	// Clears USART1 Control and Status register B. 
 	UCSR1A = 0; // Configures normal speed by clearing U2X1. Asynchronous communication
 	
-	// set baud rate (via UBRR0 high and low registers)
+	// Wei: Write the divisor to USART1's high and low baud registers.
 	UBRR1H = (unsigned char)(UBRR >> 8);
 	UBRR1L = (unsigned char)UBRR;
 	
